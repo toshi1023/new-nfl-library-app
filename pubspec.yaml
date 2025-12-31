@@ -34,6 +34,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  riverpod: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +62,79 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+
+  # 画像の設定をここに書く
+  assets:
+     - assets/images/nfl_logo/nfl_logo_resize.jpg
+     - assets/images/favorite_teams/San_Francisco_49ers_logo_mini.png
+     - assets/images/background_images/49ers_cover.jpg
+     - assets/images/background_images/bears_cover.jpg
+     - assets/images/background_images/bengals_cover.jpg
+     - assets/images/background_images/bills_cover.jpg
+     - assets/images/background_images/broncos_cover.jpg
+     - assets/images/background_images/browns_cover.jpg
+     - assets/images/background_images/buccaneers_cover.jpg
+     - assets/images/background_images/cardinals_cover.jpg
+     - assets/images/background_images/chargers_cover.jpg
+     - assets/images/background_images/chiefs_cover.jpg
+     - assets/images/background_images/colts_cover.jpg
+     - assets/images/background_images/cowboys_cover.jpg
+     - assets/images/background_images/dolphins_cover.jpg
+     - assets/images/background_images/eagles_cover.jpg
+     - assets/images/background_images/falcons_cover.jpg
+     - assets/images/background_images/giants_cover.jpg
+     - assets/images/background_images/jagars_cover.jpg
+     - assets/images/background_images/jets_cover.jpg
+     - assets/images/background_images/lions_cover.jpg
+     - assets/images/background_images/packers_cover.jpg
+     - assets/images/background_images/panthers_cover.jpg
+     - assets/images/background_images/patriots_cover.jpg
+     - assets/images/background_images/raiders_cover.jpg
+     - assets/images/background_images/rams_cover.jpg
+     - assets/images/background_images/ravens_cover.jpg
+     - assets/images/background_images/redskins_cover.jpg
+     - assets/images/background_images/saints_cover.jpg
+     - assets/images/background_images/seahawks_cover.jpg
+     - assets/images/background_images/steelers_cover.jpg
+     - assets/images/background_images/texans_cover.jpg
+     - assets/images/background_images/titans_cover.jpg
+     - assets/images/background_images/vikings_cover.jpg
+     - assets/images/icons/defence-logo-resize.png
+     - assets/images/icons/offence-logo-resize.jpg
+     - assets/images/logos/49ers.gif
+     - assets/images/logos/bears.gif
+     - assets/images/logos/bengals.gif
+     - assets/images/logos/bills.gif
+     - assets/images/logos/broncos.gif
+     - assets/images/logos/browns.gif
+     - assets/images/logos/buccaneers.gif
+     - assets/images/logos/cardinals.gif
+     - assets/images/logos/chargers.gif
+     - assets/images/logos/chiefs.gif
+     - assets/images/logos/colts.gif
+     - assets/images/logos/cowboys.gif
+     - assets/images/logos/dolphins.gif
+     - assets/images/logos/eagles.gif
+     - assets/images/logos/falcons.gif
+     - assets/images/logos/giants.gif
+     - assets/images/logos/jaguars.gif
+     - assets/images/logos/jets.gif
+     - assets/images/logos/lions.gif
+     - assets/images/logos/packers.gif
+     - assets/images/logos/panthers.gif
+     - assets/images/logos/patriots.gif
+     - assets/images/logos/raiders.gif
+     - assets/images/logos/rams.gif
+     - assets/images/logos/ravens.gif
+     - assets/images/logos/commanders.gif
+     - assets/images/logos/saints.gif
+     - assets/images/logos/seahawks.gif
+     - assets/images/logos/steelers.gif
+     - assets/images/logos/texans.gif
+     - assets/images/logos/titans.gif
+     - assets/images/logos/vikings.gif
+     - assets/images/icons/defence-logo-resize.png
+     - assets/images/icons/offence-logo-resize.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
