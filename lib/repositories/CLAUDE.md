@@ -68,63 +68,51 @@ abstract class PlayerRepository {
 
 ### 実装クラス
 
+`BaseRepositoryImpl` を継承し、親クラスの `get` / `post` / `put` / `delete` / `patch` メソッドを呼び出す。
+Dio のインスタンス管理・エラーハンドリングは全て `BaseRepositoryImpl` に集約されているため、ドメインリポジトリでは API パスと `fromJson` の変換処理だけを記述する。
+
 ```dart
-import 'package:dio/dio.dart';
 import 'package:nfl_library_app/types/api/api_result.dart';
 import 'package:nfl_library_app/types/api/player/player_response.dart';
 import 'package:nfl_library_app/types/api/player/player_request.dart';
+import 'package:nfl_library_app/repositories/base_repository_impl.dart';
 import 'package:nfl_library_app/repositories/player/player_repository.dart';
 
 /// 選手リポジトリの実装
-class PlayerRepositoryImpl implements PlayerRepository {
-  final Dio _dio;
-
-  PlayerRepositoryImpl({Dio? dio})
-      : _dio = dio ?? Dio();
-
+class PlayerRepositoryImpl extends BaseRepositoryImpl
+    implements PlayerRepository {
   @override
   Future<ApiResult<List<PlayerResponse>>> getPlayers({
     required int seasonYear,
     required int teamId,
   }) async {
-    try {
-      final response = await _dio.get(
-        '/players',
-        queryParameters: {
-          'season': seasonYear,
-          'team': teamId,
-        },
-      );
+    return get(
+      '/players',
+      queryParameters: {'season': seasonYear, 'team': teamId},
+      fromJson: (data) =>
+          (data as List).map((e) => PlayerResponse.fromJson(e)).toList(),
+    );
+  }
 
-      final json = response.data as Map<String, dynamic>;
-      final players = (json['data'] as List)
-          .map((e) => PlayerResponse.fromJson(e))
-          .toList();
-      return ApiResult.success(
-        message: json['message'] ?? '',
-        data: players,
-      );
-    } on DioException catch (e) {
-      final json = e.response?.data;
-      if (json is Map<String, dynamic>) {
-        if (e.response?.statusCode == 422) {
-          return ApiResult.validationError(
-            message: json['message'] ?? '',
-            errors: (json['errors'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, List<String>.from(value)),
-            ),
-          );
-        }
-        return ApiResult.error(
-          message: json['message'] ?? '',
-          error: json['error'] ?? 'Unknown error',
-        );
-      }
-      return ApiResult.error(
-        message: '通信エラーが発生しました',
-        error: e.message ?? e.toString(),
-      );
-    }
+  @override
+  Future<ApiResult<PlayerResponse>> getPlayerDetail({
+    required int playerId,
+  }) async {
+    return get(
+      '/players/$playerId',
+      fromJson: (data) => PlayerResponse.fromJson(data),
+    );
+  }
+
+  @override
+  Future<ApiResult<PlayerResponse>> updatePlayer({
+    required PlayerRequest request,
+  }) async {
+    return put(
+      '/players/${request.id}',
+      data: request.toJson(),
+      fromJson: (data) => PlayerResponse.fromJson(data),
+    );
   }
 }
 ```
