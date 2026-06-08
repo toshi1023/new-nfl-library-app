@@ -123,11 +123,14 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
               ),
               const SizedBox(width: StyleConstants.sm),
             ],
-            Text(
-              _selectedItem!.text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                _selectedItem!.text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: StyleConstants.sm),

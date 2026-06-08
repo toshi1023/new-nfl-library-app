@@ -4,7 +4,7 @@ class ApiConstants {
    * ベースURL
    ********************************************/
   /// APIのベースURL
-  static const String baseUrl = 'https://api.example.com';
+  static const String baseUrl = 'http://192.168.11.5';
 
   /********************************************
    * タイムアウト
