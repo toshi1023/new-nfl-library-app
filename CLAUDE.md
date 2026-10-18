@@ -9,6 +9,7 @@
 | コード生成 | freezed / json_serializable / riverpod_generator | 不変クラス・JSON変換・Provider生成 |
 | ビルド | build_runner | コード生成の実行基盤 |
 | Lint | flutter_lints / riverpod_lint | 静的解析 |
+| 環境変数 | envied / envied_generator | `.env` の値を型安全に読み込み |
 
 ## フォルダ構成
 
@@ -18,6 +19,7 @@ lib/
 ├── controllers/     # ビジネスロジック
 │   ├── components/  #   └ コンポーネント用
 │   └── pages/       #   └ ページ用
+├── env/             # 環境変数（envied）
 ├── providers/       # Riverpod State / Notifier
 │   ├── components/  #   └ コンポーネント用
 │   ├── domains/     #   └ ドメイン用(keepAlive)
@@ -42,6 +44,9 @@ lib/
 
 ### controllers/
 ビジネスロジックを管理する。Repositoryを通じてAPIで取得した値をNotifierなどを通じてStateに反映する。
+
+### env/
+環境ごとに変わる値を管理する。`.env` の値を envied で `Env` クラスに読み込み、`consts/` の定数クラスから参照する。
 
 ### providers/
 RiverpodのStateクラスとNotifierクラスを管理する。`Notifier` + `NotifierProvider` パターンで定義する。
@@ -107,3 +112,5 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 生成ファイル（`.freezed.dart`, `.g.dart`）は手動で編集しない。
+
+`.env` を変更した場合も同じコマンドで `lib/env/env.g.dart` を再生成する（`.env` が無いとビルドに失敗するため、初回は `cp .env.example .env` で作成する）。

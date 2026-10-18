@@ -13,13 +13,17 @@ _RosterResponse _$RosterResponseFromJson(Map<String, dynamic> json) =>
       teamId: (json['team_id'] as num).toInt(),
       playerId: (json['player_id'] as num).toInt(),
       positionId: (json['position_id'] as num).toInt(),
-      number: (json['number'] as num).toInt(),
+      number: (json['number'] as num?)?.toInt(),
       rating: (json['rating'] as num?)?.toInt(),
-      experience: (json['experience'] as num).toInt(),
+      experience: (json['experience'] as num?)?.toInt(),
       player:
           RosterPlayerResponse.fromJson(json['player'] as Map<String, dynamic>),
       position: RosterPositionResponse.fromJson(
           json['position'] as Map<String, dynamic>),
+      maddenAttributes: (json['madden_attributes'] as List<dynamic>)
+          .map((e) =>
+              MaddenAttributeResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$RosterResponseToJson(_RosterResponse instance) =>
@@ -34,6 +38,7 @@ Map<String, dynamic> _$RosterResponseToJson(_RosterResponse instance) =>
       'experience': instance.experience,
       'player': instance.player,
       'position': instance.position,
+      'madden_attributes': instance.maddenAttributes,
     };
 
 _RosterPlayerResponse _$RosterPlayerResponseFromJson(
@@ -94,4 +99,20 @@ Map<String, dynamic> _$RosterPositionResponseToJson(
       'category': instance.category,
       'name': instance.name,
       'odflg': instance.odflg,
+    };
+
+_MaddenAttributeResponse _$MaddenAttributeResponseFromJson(
+        Map<String, dynamic> json) =>
+    _MaddenAttributeResponse(
+      key: json['key'] as String,
+      label: json['label'] as String,
+      value: json['value'] as String,
+    );
+
+Map<String, dynamic> _$MaddenAttributeResponseToJson(
+        _MaddenAttributeResponse instance) =>
+    <String, dynamic>{
+      'key': instance.key,
+      'label': instance.label,
+      'value': instance.value,
     };

@@ -6,7 +6,7 @@ class RosterPlayer {
   final String lastName;
   final int age;
   final String? imageUrl;
-  final int number;
+  final int? number;
   final int? rating;
   final String positionName;
 
@@ -16,7 +16,7 @@ class RosterPlayer {
     required this.lastName,
     required this.age,
     this.imageUrl,
-    required this.number,
+    this.number,
     this.rating,
     required this.positionName,
   });

@@ -24,10 +24,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
-  int? _selectYearItem = 0;
-  int? _selectTeamItem = 0;
-  final List<String> _searchKeywords = [];
-
   // スクロール連動アニメーション用
   late ScrollController _scrollController;
   late AnimationController _animationController;
@@ -36,6 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
 
   // コントローラー
   late HomeScreenController _controller;
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -62,6 +59,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   void didChangeDependencies() {
     super.didChangeDependencies();
     _controller = HomeScreenController(ref);
+
+    if (!_initialized) {
+      _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeData();
+      });
+    }
+  }
+
+  /// 初期データの取得
+  Future<void> _initializeData() async {
+    try {
+      await LoadingHelper.withLoading(ref, () async {
+        await _controller.initialize();
+      }, message: 'データを取得中...');
+    } catch (e, stackTrace) {
+      print(stackTrace);
+      if (mounted) {
+        CommonFunctions.showErrorSnackBar(context, e.toString());
+      }
+    }
   }
 
   /// スクロール方向に応じて検索エリアの表示/非表示を切り替える
@@ -79,57 +97,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     }
   }
 
-  /// 入力欄の値を受け取って検索処理を実行する
-  void callbackHandleInput(String value) {
-    if (value.isNotEmpty) {
-      setState(() {
-        _searchKeywords.add(value);
-      });
-    }
+  /// 入力欄の値を検索キーワードに追加して選手名検索を実行する
+  Future<void> callbackHandleInput(String value) async {
+    final name = value.trim();
+    if (name.isEmpty) return;
+    await _searchByName(() => _controller.addSearchName(name));
   }
 
-  /// クリックしたタグを入力欄から除外する
-  void callbackHandleDeleteTag(String value) {
-    setState(() {
-      _searchKeywords.remove(value);
-    });
+  /// クリックしたタグを検索キーワードから除外して再検索する
+  Future<void> callbackHandleDeleteTag(String value) async {
+    await _searchByName(() => _controller.removeSearchName(value));
+  }
+
+  /// 選手名検索の実行（ローディング表示・エラー通知を共通化）
+  Future<void> _searchByName(Future<void> Function() search) async {
+    try {
+      await LoadingHelper.withLoading(ref, search,
+          message: '選手データを取得中...');
+    } catch (e) {
+      if (mounted) {
+        CommonFunctions.showErrorSnackBar(context, e.toString());
+      }
+    }
   }
 
   /// 選択シーズンの更新処理
-  void callbackChangeSeason(ISelectBox<int> value) {
-    setState(() {
-      _selectYearItem = value.value;
-    });
-    _checkBothSelected();
-  }
-
-  /// 選択チームの更新処理
-  void callbackChangeTeam(ISelectBox<int> value) {
-    setState(() {
-      _selectTeamItem = value.value;
-    });
-    _checkBothSelected();
-  }
-
-  /// 両方が選択されている場合にAPI呼び出しを実行
-  void _checkBothSelected() {
-    if (_selectYearItem != null && _selectYearItem != 0 &&
-        _selectTeamItem != null && _selectTeamItem != 0) {
-      _onSearch();
+  Future<void> callbackChangeSeason(ISelectBox<int> value) async {
+    try {
+      await LoadingHelper.withLoading(ref, () async {
+        await _controller.changeSeason(value.value);
+      }, message: '選手データを取得中...');
+    } catch (e) {
+      if (mounted) {
+        CommonFunctions.showErrorSnackBar(context, e.toString());
+      }
     }
   }
 
-  /// 検索実行
-  Future<void> _onSearch() async {
+  /// 選択チームの更新処理
+  Future<void> callbackChangeTeam(ISelectBox<int> value) async {
     try {
       await LoadingHelper.withLoading(ref, () async {
-        await _controller.fetchPlayersInfo(
-          season: _selectYearItem!,
-          teamId: _selectTeamItem!,
-        );
+        await _controller.changeTeam(value.value);
       }, message: '選手データを取得中...');
-    } catch (e, stackTrace) {
-      print(stackTrace);
+    } catch (e) {
       if (mounted) {
         CommonFunctions.showErrorSnackBar(context, e.toString());
       }
@@ -151,13 +162,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       appBar: const CustomAppMainBar(),
       body: Column(
         children: [
-          // 検索エリア
-          _buildSearchArea(),
+          // 検索エリア（データ取得完了時のみ表示）
+          if (state is HomeStateLoaded)
+            _buildSearchArea(state),
           // リスト表示エリア
           Expanded(
             child: switch (state) {
               HomeStateInitial() =>
-                const Center(child: Text('シーズンとチームを選択してください')),
+                const Center(child: Text('データを読み込み中...')),
               HomeStateLoading() =>
                 const Center(child: CircularProgressIndicator()),
               HomeStateLoaded(:final players) =>
@@ -174,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   }
 
   /// 検索エリアの描画
-  Widget _buildSearchArea() {
+  Widget _buildSearchArea(HomeStateLoaded state) {
     return Container(
       padding: const EdgeInsets.all(StyleConstants.sm),
       decoration: BoxDecoration(
@@ -207,29 +219,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  FutureBuilder<List<ISelectBox<int>>>(
-                    future: _controller.fetchSeasonList(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return SizedBox(
-                          width: 110,
-                          height: 35,
-                          child: CustomSelectBox<int>(
-                            selectList: snapshot.data!,
-                            title: 'シーズンを選択してください',
-                            callback: callbackChangeSeason,
-                            backgroundColor: StyleConstants.lightGray,
-                            textColor: StyleConstants.gray,
-                          ),
-                        );
-                      } else {
-                        return const CircularProgressIndicator();
-                      }
-                    },
+                  SizedBox(
+                    width: 110,
+                    height: 35,
+                    child: CustomSelectBox<int>(
+                      selectList: state.seasons,
+                      title: 'シーズンを選択してください',
+                      callback: callbackChangeSeason,
+                      backgroundColor: StyleConstants.lightGray,
+                      textColor: StyleConstants.gray,
+                    ),
                   ),
                   const SizedBox(width: StyleConstants.sm),
-                  ..._searchKeywords.map((keyword) =>
-                    CustomTag(text: keyword, onTap: callbackHandleDeleteTag),
+                  ...state.searchNames.map((name) =>
+                    CustomTag(text: name, onTap: callbackHandleDeleteTag),
                   ),
                 ],
               ),
@@ -239,22 +242,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
             padding: const EdgeInsets.symmetric(vertical: StyleConstants.sm),
             child: Row(
               children: [
-                FutureBuilder<List<ISelectBox<int>>>(
-                  future: _controller.fetchTeamList(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Expanded(
-                        flex: 1,
-                        child: CustomSelectTag<int>(
-                          selectList: snapshot.data!,
-                          callback: callbackChangeTeam,
-                          selectionPrompt: 'チームを選択してください',
-                        ),
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  },
+                Expanded(
+                  flex: 1,
+                  child: CustomSelectTag<int>(
+                    selectList: state.teams,
+                    callback: callbackChangeTeam,
+                    selectionPrompt: 'チームを選択してください',
+                    selectedValue: state.selectedTeam,
+                    storageKey: 'home_team_select',
+                  ),
                 ),
               ],
             ),
@@ -310,7 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                   Row(
                     children: [
                       Text(
-                        '#${player.number}',
+                        '#${player.number ?? '-'}',
                         style: const TextStyle(
                           fontSize: StyleConstants.fontSizeSm,
                           fontWeight: FontWeight.bold,
@@ -402,7 +398,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           Text(message),
           const SizedBox(height: StyleConstants.lg),
           ElevatedButton(
-            onPressed: _onSearch,
+            onPressed: _initializeData,
             child: const Text('再試行'),
           ),
         ],

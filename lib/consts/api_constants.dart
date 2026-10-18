@@ -1,10 +1,12 @@
+import 'package:nfl_library_app/env/env.dart';
+
 /// API通信に関する定数を定義するクラス
 class ApiConstants {
   /********************************************
    * ベースURL
    ********************************************/
-  /// APIのベースURL
-  static const String baseUrl = 'http://192.168.11.5';
+  /// APIのベースURL（.env の API_BASE_URL）
+  static const String baseUrl = Env.apiBaseUrl;
 
   /********************************************
    * タイムアウト

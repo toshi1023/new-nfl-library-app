@@ -22,11 +22,13 @@ mixin _$RosterResponse {
   int get playerId;
   @JsonKey(name: 'position_id')
   int get positionId;
-  int get number;
+  int? get number;
   int? get rating;
-  int get experience;
+  int? get experience;
   RosterPlayerResponse get player;
   RosterPositionResponse get position;
+  @JsonKey(name: 'madden_attributes')
+  List<MaddenAttributeResponse> get maddenAttributes;
 
   /// Create a copy of RosterResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -57,17 +59,30 @@ mixin _$RosterResponse {
                 other.experience == experience) &&
             (identical(other.player, player) || other.player == player) &&
             (identical(other.position, position) ||
-                other.position == position));
+                other.position == position) &&
+            const DeepCollectionEquality()
+                .equals(other.maddenAttributes, maddenAttributes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, season, teamId, playerId,
-      positionId, number, rating, experience, player, position);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      season,
+      teamId,
+      playerId,
+      positionId,
+      number,
+      rating,
+      experience,
+      player,
+      position,
+      const DeepCollectionEquality().hash(maddenAttributes));
 
   @override
   String toString() {
-    return 'RosterResponse(id: $id, season: $season, teamId: $teamId, playerId: $playerId, positionId: $positionId, number: $number, rating: $rating, experience: $experience, player: $player, position: $position)';
+    return 'RosterResponse(id: $id, season: $season, teamId: $teamId, playerId: $playerId, positionId: $positionId, number: $number, rating: $rating, experience: $experience, player: $player, position: $position, maddenAttributes: $maddenAttributes)';
   }
 }
 
@@ -83,11 +98,13 @@ abstract mixin class $RosterResponseCopyWith<$Res> {
       @JsonKey(name: 'team_id') int teamId,
       @JsonKey(name: 'player_id') int playerId,
       @JsonKey(name: 'position_id') int positionId,
-      int number,
+      int? number,
       int? rating,
-      int experience,
+      int? experience,
       RosterPlayerResponse player,
-      RosterPositionResponse position});
+      RosterPositionResponse position,
+      @JsonKey(name: 'madden_attributes')
+      List<MaddenAttributeResponse> maddenAttributes});
 
   $RosterPlayerResponseCopyWith<$Res> get player;
   $RosterPositionResponseCopyWith<$Res> get position;
@@ -111,11 +128,12 @@ class _$RosterResponseCopyWithImpl<$Res>
     Object? teamId = null,
     Object? playerId = null,
     Object? positionId = null,
-    Object? number = null,
+    Object? number = freezed,
     Object? rating = freezed,
-    Object? experience = null,
+    Object? experience = freezed,
     Object? player = null,
     Object? position = null,
+    Object? maddenAttributes = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -138,18 +156,18 @@ class _$RosterResponseCopyWithImpl<$Res>
           ? _self.positionId
           : positionId // ignore: cast_nullable_to_non_nullable
               as int,
-      number: null == number
+      number: freezed == number
           ? _self.number
           : number // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       rating: freezed == rating
           ? _self.rating
           : rating // ignore: cast_nullable_to_non_nullable
               as int?,
-      experience: null == experience
+      experience: freezed == experience
           ? _self.experience
           : experience // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       player: null == player
           ? _self.player
           : player // ignore: cast_nullable_to_non_nullable
@@ -158,6 +176,10 @@ class _$RosterResponseCopyWithImpl<$Res>
           ? _self.position
           : position // ignore: cast_nullable_to_non_nullable
               as RosterPositionResponse,
+      maddenAttributes: null == maddenAttributes
+          ? _self.maddenAttributes
+          : maddenAttributes // ignore: cast_nullable_to_non_nullable
+              as List<MaddenAttributeResponse>,
     ));
   }
 
@@ -281,11 +303,13 @@ extension RosterResponsePatterns on RosterResponse {
             @JsonKey(name: 'team_id') int teamId,
             @JsonKey(name: 'player_id') int playerId,
             @JsonKey(name: 'position_id') int positionId,
-            int number,
+            int? number,
             int? rating,
-            int experience,
+            int? experience,
             RosterPlayerResponse player,
-            RosterPositionResponse position)?
+            RosterPositionResponse position,
+            @JsonKey(name: 'madden_attributes')
+            List<MaddenAttributeResponse> maddenAttributes)?
         $default, {
     required TResult orElse(),
   }) {
@@ -302,7 +326,8 @@ extension RosterResponsePatterns on RosterResponse {
             _that.rating,
             _that.experience,
             _that.player,
-            _that.position);
+            _that.position,
+            _that.maddenAttributes);
       case _:
         return orElse();
     }
@@ -329,11 +354,13 @@ extension RosterResponsePatterns on RosterResponse {
             @JsonKey(name: 'team_id') int teamId,
             @JsonKey(name: 'player_id') int playerId,
             @JsonKey(name: 'position_id') int positionId,
-            int number,
+            int? number,
             int? rating,
-            int experience,
+            int? experience,
             RosterPlayerResponse player,
-            RosterPositionResponse position)
+            RosterPositionResponse position,
+            @JsonKey(name: 'madden_attributes')
+            List<MaddenAttributeResponse> maddenAttributes)
         $default,
   ) {
     final _that = this;
@@ -349,7 +376,8 @@ extension RosterResponsePatterns on RosterResponse {
             _that.rating,
             _that.experience,
             _that.player,
-            _that.position);
+            _that.position,
+            _that.maddenAttributes);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -375,11 +403,13 @@ extension RosterResponsePatterns on RosterResponse {
             @JsonKey(name: 'team_id') int teamId,
             @JsonKey(name: 'player_id') int playerId,
             @JsonKey(name: 'position_id') int positionId,
-            int number,
+            int? number,
             int? rating,
-            int experience,
+            int? experience,
             RosterPlayerResponse player,
-            RosterPositionResponse position)?
+            RosterPositionResponse position,
+            @JsonKey(name: 'madden_attributes')
+            List<MaddenAttributeResponse> maddenAttributes)?
         $default,
   ) {
     final _that = this;
@@ -395,7 +425,8 @@ extension RosterResponsePatterns on RosterResponse {
             _that.rating,
             _that.experience,
             _that.player,
-            _that.position);
+            _that.position,
+            _that.maddenAttributes);
       case _:
         return null;
     }
@@ -411,11 +442,14 @@ class _RosterResponse implements RosterResponse {
       @JsonKey(name: 'team_id') required this.teamId,
       @JsonKey(name: 'player_id') required this.playerId,
       @JsonKey(name: 'position_id') required this.positionId,
-      required this.number,
+      this.number,
       this.rating,
-      required this.experience,
+      this.experience,
       required this.player,
-      required this.position});
+      required this.position,
+      @JsonKey(name: 'madden_attributes')
+      required final List<MaddenAttributeResponse> maddenAttributes})
+      : _maddenAttributes = maddenAttributes;
   factory _RosterResponse.fromJson(Map<String, dynamic> json) =>
       _$RosterResponseFromJson(json);
 
@@ -433,15 +467,24 @@ class _RosterResponse implements RosterResponse {
   @JsonKey(name: 'position_id')
   final int positionId;
   @override
-  final int number;
+  final int? number;
   @override
   final int? rating;
   @override
-  final int experience;
+  final int? experience;
   @override
   final RosterPlayerResponse player;
   @override
   final RosterPositionResponse position;
+  final List<MaddenAttributeResponse> _maddenAttributes;
+  @override
+  @JsonKey(name: 'madden_attributes')
+  List<MaddenAttributeResponse> get maddenAttributes {
+    if (_maddenAttributes is EqualUnmodifiableListView)
+      return _maddenAttributes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_maddenAttributes);
+  }
 
   /// Create a copy of RosterResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -476,17 +519,30 @@ class _RosterResponse implements RosterResponse {
                 other.experience == experience) &&
             (identical(other.player, player) || other.player == player) &&
             (identical(other.position, position) ||
-                other.position == position));
+                other.position == position) &&
+            const DeepCollectionEquality()
+                .equals(other._maddenAttributes, _maddenAttributes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, season, teamId, playerId,
-      positionId, number, rating, experience, player, position);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      season,
+      teamId,
+      playerId,
+      positionId,
+      number,
+      rating,
+      experience,
+      player,
+      position,
+      const DeepCollectionEquality().hash(_maddenAttributes));
 
   @override
   String toString() {
-    return 'RosterResponse(id: $id, season: $season, teamId: $teamId, playerId: $playerId, positionId: $positionId, number: $number, rating: $rating, experience: $experience, player: $player, position: $position)';
+    return 'RosterResponse(id: $id, season: $season, teamId: $teamId, playerId: $playerId, positionId: $positionId, number: $number, rating: $rating, experience: $experience, player: $player, position: $position, maddenAttributes: $maddenAttributes)';
   }
 }
 
@@ -504,11 +560,13 @@ abstract mixin class _$RosterResponseCopyWith<$Res>
       @JsonKey(name: 'team_id') int teamId,
       @JsonKey(name: 'player_id') int playerId,
       @JsonKey(name: 'position_id') int positionId,
-      int number,
+      int? number,
       int? rating,
-      int experience,
+      int? experience,
       RosterPlayerResponse player,
-      RosterPositionResponse position});
+      RosterPositionResponse position,
+      @JsonKey(name: 'madden_attributes')
+      List<MaddenAttributeResponse> maddenAttributes});
 
   @override
   $RosterPlayerResponseCopyWith<$Res> get player;
@@ -534,11 +592,12 @@ class __$RosterResponseCopyWithImpl<$Res>
     Object? teamId = null,
     Object? playerId = null,
     Object? positionId = null,
-    Object? number = null,
+    Object? number = freezed,
     Object? rating = freezed,
-    Object? experience = null,
+    Object? experience = freezed,
     Object? player = null,
     Object? position = null,
+    Object? maddenAttributes = null,
   }) {
     return _then(_RosterResponse(
       id: null == id
@@ -561,18 +620,18 @@ class __$RosterResponseCopyWithImpl<$Res>
           ? _self.positionId
           : positionId // ignore: cast_nullable_to_non_nullable
               as int,
-      number: null == number
+      number: freezed == number
           ? _self.number
           : number // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       rating: freezed == rating
           ? _self.rating
           : rating // ignore: cast_nullable_to_non_nullable
               as int?,
-      experience: null == experience
+      experience: freezed == experience
           ? _self.experience
           : experience // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       player: null == player
           ? _self.player
           : player // ignore: cast_nullable_to_non_nullable
@@ -581,6 +640,10 @@ class __$RosterResponseCopyWithImpl<$Res>
           ? _self.position
           : position // ignore: cast_nullable_to_non_nullable
               as RosterPositionResponse,
+      maddenAttributes: null == maddenAttributes
+          ? _self._maddenAttributes
+          : maddenAttributes // ignore: cast_nullable_to_non_nullable
+              as List<MaddenAttributeResponse>,
     ));
   }
 
@@ -1727,6 +1790,345 @@ class __$RosterPositionResponseCopyWithImpl<$Res>
           ? _self.odflg
           : odflg // ignore: cast_nullable_to_non_nullable
               as int?,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$MaddenAttributeResponse {
+  /// CSV ヘッダーそのまま（表記ゆれを含む）
+  String get key;
+
+  /// 日本語名
+  String get label;
+  String get value;
+
+  /// Create a copy of MaddenAttributeResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MaddenAttributeResponseCopyWith<MaddenAttributeResponse> get copyWith =>
+      _$MaddenAttributeResponseCopyWithImpl<MaddenAttributeResponse>(
+          this as MaddenAttributeResponse, _$identity);
+
+  /// Serializes this MaddenAttributeResponse to a JSON map.
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MaddenAttributeResponse &&
+            (identical(other.key, key) || other.key == key) &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.value, value) || other.value == value));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, key, label, value);
+
+  @override
+  String toString() {
+    return 'MaddenAttributeResponse(key: $key, label: $label, value: $value)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MaddenAttributeResponseCopyWith<$Res> {
+  factory $MaddenAttributeResponseCopyWith(MaddenAttributeResponse value,
+          $Res Function(MaddenAttributeResponse) _then) =
+      _$MaddenAttributeResponseCopyWithImpl;
+  @useResult
+  $Res call({String key, String label, String value});
+}
+
+/// @nodoc
+class _$MaddenAttributeResponseCopyWithImpl<$Res>
+    implements $MaddenAttributeResponseCopyWith<$Res> {
+  _$MaddenAttributeResponseCopyWithImpl(this._self, this._then);
+
+  final MaddenAttributeResponse _self;
+  final $Res Function(MaddenAttributeResponse) _then;
+
+  /// Create a copy of MaddenAttributeResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? key = null,
+    Object? label = null,
+    Object? value = null,
+  }) {
+    return _then(_self.copyWith(
+      key: null == key
+          ? _self.key
+          : key // ignore: cast_nullable_to_non_nullable
+              as String,
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      value: null == value
+          ? _self.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [MaddenAttributeResponse].
+extension MaddenAttributeResponsePatterns on MaddenAttributeResponse {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MaddenAttributeResponse value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MaddenAttributeResponse value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MaddenAttributeResponse value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String key, String label, String value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse() when $default != null:
+        return $default(_that.key, _that.label, _that.value);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String key, String label, String value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse():
+        return $default(_that.key, _that.label, _that.value);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String key, String label, String value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MaddenAttributeResponse() when $default != null:
+        return $default(_that.key, _that.label, _that.value);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _MaddenAttributeResponse implements MaddenAttributeResponse {
+  const _MaddenAttributeResponse(
+      {required this.key, required this.label, required this.value});
+  factory _MaddenAttributeResponse.fromJson(Map<String, dynamic> json) =>
+      _$MaddenAttributeResponseFromJson(json);
+
+  /// CSV ヘッダーそのまま（表記ゆれを含む）
+  @override
+  final String key;
+
+  /// 日本語名
+  @override
+  final String label;
+  @override
+  final String value;
+
+  /// Create a copy of MaddenAttributeResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MaddenAttributeResponseCopyWith<_MaddenAttributeResponse> get copyWith =>
+      __$MaddenAttributeResponseCopyWithImpl<_MaddenAttributeResponse>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$MaddenAttributeResponseToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MaddenAttributeResponse &&
+            (identical(other.key, key) || other.key == key) &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.value, value) || other.value == value));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, key, label, value);
+
+  @override
+  String toString() {
+    return 'MaddenAttributeResponse(key: $key, label: $label, value: $value)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MaddenAttributeResponseCopyWith<$Res>
+    implements $MaddenAttributeResponseCopyWith<$Res> {
+  factory _$MaddenAttributeResponseCopyWith(_MaddenAttributeResponse value,
+          $Res Function(_MaddenAttributeResponse) _then) =
+      __$MaddenAttributeResponseCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String key, String label, String value});
+}
+
+/// @nodoc
+class __$MaddenAttributeResponseCopyWithImpl<$Res>
+    implements _$MaddenAttributeResponseCopyWith<$Res> {
+  __$MaddenAttributeResponseCopyWithImpl(this._self, this._then);
+
+  final _MaddenAttributeResponse _self;
+  final $Res Function(_MaddenAttributeResponse) _then;
+
+  /// Create a copy of MaddenAttributeResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? key = null,
+    Object? label = null,
+    Object? value = null,
+  }) {
+    return _then(_MaddenAttributeResponse(
+      key: null == key
+          ? _self.key
+          : key // ignore: cast_nullable_to_non_nullable
+              as String,
+      label: null == label
+          ? _self.label
+          : label // ignore: cast_nullable_to_non_nullable
+              as String,
+      value: null == value
+          ? _self.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }

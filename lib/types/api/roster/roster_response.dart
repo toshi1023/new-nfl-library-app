@@ -12,11 +12,13 @@ abstract class RosterResponse with _$RosterResponse {
     @JsonKey(name: 'team_id') required int teamId,
     @JsonKey(name: 'player_id') required int playerId,
     @JsonKey(name: 'position_id') required int positionId,
-    required int number,
+    int? number,
     int? rating,
-    required int experience,
+    int? experience,
     required RosterPlayerResponse player,
     required RosterPositionResponse position,
+    @JsonKey(name: 'madden_attributes')
+    required List<MaddenAttributeResponse> maddenAttributes,
   }) = _RosterResponse;
 
   factory RosterResponse.fromJson(Map<String, dynamic> json) =>
@@ -61,4 +63,20 @@ abstract class RosterPositionResponse with _$RosterPositionResponse {
 
   factory RosterPositionResponse.fromJson(Map<String, dynamic> json) =>
       _$RosterPositionResponseFromJson(json);
+}
+
+/// Madden NFL の評価値（rosters の他の列に対応しない項目）
+@freezed
+abstract class MaddenAttributeResponse with _$MaddenAttributeResponse {
+  const factory MaddenAttributeResponse({
+    /// CSV ヘッダーそのまま（表記ゆれを含む）
+    required String key,
+
+    /// 日本語名
+    required String label,
+    required String value,
+  }) = _MaddenAttributeResponse;
+
+  factory MaddenAttributeResponse.fromJson(Map<String, dynamic> json) =>
+      _$MaddenAttributeResponseFromJson(json);
 }

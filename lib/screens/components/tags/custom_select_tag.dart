@@ -9,6 +9,8 @@ class CustomSelectTag<T> extends StatefulWidget {
     required this.selectList,
     required this.callback,
     this.selectionPrompt = '選択してください',
+    this.selectedValue,
+    this.storageKey,
   }) : super(key: key);
   /// 検索内容の配列
   final List<ISelectBox<T>> selectList;
@@ -16,6 +18,11 @@ class CustomSelectTag<T> extends StatefulWidget {
   final String selectionPrompt;
   /// 検索を実行するコールバック関数
   final void Function(ISelectBox<T>) callback;
+  /// 選択中の値（未指定、または一致する項目が無い場合は先頭の項目を選択）
+  final T? selectedValue;
+  /// タグ一覧のスクロール位置を保存するキー（未指定の場合は保存しない）
+  /// 同じ画面に複数配置する場合は、それぞれ異なる値を指定すること
+  final String? storageKey;
 
   @override
   State<CustomSelectTag<T>> createState() => _CustomSelectTagState<T>();
@@ -27,15 +34,13 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
   bool _isExpanded = false;  // 展開状態を管理
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
+  // 選択中のチップ（展開時に表示範囲までスクロールするために使用）
+  final GlobalKey _selectedChipKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    // 初期値として最初のアイテムを選択
-    if (widget.selectList.isNotEmpty) {
-      // widgetはState<T>を継承していることでプロパティが付与されており、そこに親ウィジェットから渡されたデータが格納されている
-      _selectedItem = widget.selectList.first;
-    }
+    _selectedItem = _findSelectedItem();
     
     // アニメーションコントローラーの初期化
     _animationController = AnimationController(
@@ -57,7 +62,56 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
           _isExpanded = false;
         });
       }
+      if (status == AnimationStatus.completed && mounted) {
+        // 展開完了時に選択中のチップが見えていなければ表示範囲までスクロール
+        _scrollToSelectedChip();
+      }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomSelectTag<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 親から渡された選択値・選択肢が変わった場合は選択中の項目を合わせる
+    if (oldWidget.selectedValue != widget.selectedValue ||
+        oldWidget.selectList != widget.selectList) {
+      _selectedItem = _findSelectedItem();
+    }
+  }
+
+  /// selectedValue に一致する項目を返す（無ければ先頭の項目、選択肢が空なら null）
+  ISelectBox<T>? _findSelectedItem() {
+    // widgetはState<T>を継承していることでプロパティが付与されており、そこに親ウィジェットから渡されたデータが格納されている
+    if (widget.selectList.isEmpty) return null;
+    return widget.selectList.firstWhere(
+      (item) => item.value == widget.selectedValue,
+      orElse: () => widget.selectList.first,
+    );
+  }
+
+  /// 選択中のチップが表示範囲外の場合のみスクロールする
+  /// スクロール位置が保存済みの場合は、ユーザーが操作した位置を優先してスクロールしない
+  Future<void> _scrollToSelectedChip() async {
+    final initialContext = _selectedChipKey.currentContext;
+    if (initialContext == null) return;
+    if (PageStorage.maybeOf(initialContext)?.readState(initialContext) != null) {
+      return;
+    }
+
+    const duration = Duration(milliseconds: 200);
+    // 右側にはみ出している場合は右端に、左側にはみ出している場合は左端に合わせる
+    for (final policy in [
+      ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    ]) {
+      final chipContext = _selectedChipKey.currentContext;
+      if (chipContext == null) return;
+      await Scrollable.ensureVisible(
+        chipContext,
+        duration: duration,
+        alignmentPolicy: policy,
+      );
+    }
   }
 
   @override
@@ -152,13 +206,19 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
   Widget _buildExpandedTags() {
     return Container(
       padding: const EdgeInsets.all(StyleConstants.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(StyleConstants.md),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
+      // decoration: BoxDecoration(
+      //   color: Colors.white,
+      //   borderRadius: BorderRadius.circular(StyleConstants.md),
+      //   border: Border.all(color: Colors.grey[300]!),
+      // ),
       child: Column(
         children: [
+          Divider(
+            thickness: 1,
+            endIndent: 0,
+            color: Colors.grey[300],
+          ),
+          const SizedBox(height: StyleConstants.md),
           // 閉じるボタン
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -182,6 +242,10 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
           const SizedBox(height: StyleConstants.md),
           // タグリスト
           SingleChildScrollView(
+            // 閉じると破棄されるため、PageStorage にスクロール位置を保存して再表示時に復元する
+            key: widget.storageKey != null
+                ? PageStorageKey<String>(widget.storageKey!)
+                : null,
             scrollDirection: Axis.horizontal,
             child: Row(
               children: widget.selectList
@@ -198,6 +262,7 @@ class _CustomSelectTagState<T> extends State<CustomSelectTag<T>> with SingleTick
   Widget _buildFilterChip(ISelectBox<T> item) {
     final bool isSelected = _selectedItem?.value == item.value;
     return Container(
+      key: isSelected ? _selectedChipKey : null,
       margin: const EdgeInsets.only(right: StyleConstants.sm),
       child: FilterChip(
         label: item.imageFile != null ? Row(
